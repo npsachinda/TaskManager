@@ -3,87 +3,57 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use inertia\Inertia;
-use App\Models\TaskList;
+use Inertia\Inertia;
+use App\Services\ListService;
 
 class ListController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    protected $listService;
+
+    public function __construct(ListService $listService)
+    {
+        $this->listService = $listService;
+    }
+
     public function index()
     {
-        $lists = TaskList::where('user_id', auth()->id())->with('tasks')->get();
-        return Inertia::render('Lists/index',
-            ['lists' => $lists,
-                'flash' => [
-                    'success' => session('success'),
-                    'error' => session('error')
-                ]
-            ]);
+        $data = $this->listService->getListsData();
+
+        return Inertia::render('Lists/index', array_merge($data, [
+            'flash' => [
+                'success' => session('success'),
+                'error' => session('error')
+            ]
+        ]));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'user_id' => 'required|exists:users,id'
         ]);
 
-        TaskList::create([
-            ...$validated,
-            'user_id' => auth()->id()
-        ]);
+        $this->listService->createList($validated);
         return redirect()->route('lists.index')->with('success', 'List created successfully');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, TaskList $list)
+    public function update(Request $request, $id)
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'user_id' => 'required|exists:users,id'
         ]);
 
-        $list->update($validated);
+        $this->listService->updateList($id, $validated);
         return redirect()->route('lists.index')->with('success', 'List updated successfully');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(TaskList $list)
+    public function destroy($id)
     {
-        $list->delete();
+        $this->listService->deleteList($id);
         return redirect()->route('lists.index')->with('success', 'List deleted successfully');
     }
 }
