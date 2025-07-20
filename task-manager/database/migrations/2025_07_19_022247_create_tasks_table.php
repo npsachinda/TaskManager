@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('tasks', function (Blueprint $table) {
             $table->id();
             $table->string('title');
-            $table->string('description')->nullable();
-            $table->enum('status', ['pending', 'completed', 'cancelled'])->default('pending');
-            $table->date('due_date')->nullable();
-            $table->foreignId('list_id')->constrained()->onDelete('cascade');
+            $table->text('description')->nullable();
+            $table->enum('status', ['pending', 'completed'])->default('pending');
+            $table->timestamp('due_date')->nullable();
+            $table->foreignId('list_id')->constrained('lists')->onDelete('cascade');
             $table->timestamps();
         });
     }

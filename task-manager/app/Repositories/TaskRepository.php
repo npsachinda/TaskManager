@@ -26,14 +26,40 @@ class TaskRepository implements TaskRepositoryInterface
 
     public function getAllWithPagination($search = null, $filter = 'all', $user_filter = 'all')
     {
-        $query = $this->queryBuilder
-            ->withRelations()
-            ->forAuthUser()
-            ->withSearch($search)
-            ->withStatusFilter($filter)
-            ->withUserFilter($user_filter)
-            ->orderByLatest()
-            ->getQuery();
+        $query = $this->task->newQuery();
+
+        // Add relations
+        $query->with(['list.user']);
+
+        // Filter by authenticated user's lists
+        $query->whereHas('list', function ($q) {
+            $q->where('user_id', Auth::id());
+        });
+
+        // Add search condition
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', '%' . $search . '%')
+                    ->orWhere('description', 'like', '%' . $search . '%');
+            });
+        }
+
+        // Add status filter
+        if ($filter === 'pending') {
+            $query->where('status', 'pending');
+        } elseif ($filter === 'completed') {
+            $query->where('status', 'completed');
+        }
+
+        // Add user filter
+        if ($user_filter !== 'all') {
+            $query->whereHas('list', function ($q) use ($user_filter) {
+                $q->where('user_id', $user_filter);
+            });
+        }
+
+        // Order by latest
+        $query->orderBy('created_at', 'desc');
 
         return $query->paginate(10);
     }

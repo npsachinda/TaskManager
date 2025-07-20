@@ -42,8 +42,10 @@ class TaskQueryBuilder
 
     public function withStatusFilter(string $filter): self
     {
-        if ($filter !== 'all') {
-            $this->query->where('status', $filter);
+        if ($filter === 'pending') {
+            $this->query->pending();
+        } elseif ($filter === 'completed') {
+            $this->query->completed();
         }
         return $this;
     }
