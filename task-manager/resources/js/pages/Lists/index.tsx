@@ -10,7 +10,7 @@ import {Input} from '@/components/ui/input';
 import {Label} from '@/components/ui/label';
 import {useForm} from "@inertiajs/react";
 import {route} from "ziggy-js";
-import {Textarea} from "@headlessui/react";
+import {Textarea} from "@/components/ui/textarea";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 
 interface User {

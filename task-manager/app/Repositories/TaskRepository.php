@@ -16,12 +16,12 @@ class TaskRepository implements TaskRepositoryInterface
     protected $user;
     protected $queryBuilder;
 
-    public function __construct(Task $task, TaskList $taskList, User $user, TaskQueryBuilder $queryBuilder)
+    public function __construct(Task $task, TaskList $taskList, User $user)
     {
         $this->task = $task;
         $this->taskList = $taskList;
         $this->user = $user;
-        $this->queryBuilder = $queryBuilder;
+        $this->queryBuilder = new TaskQueryBuilder($task);
     }
 
     public function getAllWithPagination($search = null, $filter = 'all', $user_filter = 'all')
